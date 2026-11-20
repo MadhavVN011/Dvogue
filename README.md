@@ -8,11 +8,11 @@
 
 Dvogue connects a fashion storefront to two Solidity contracts. Buyers can explore a collection, verify registered product details, pay from an Ethereum-compatible wallet, and receive a transferable ERC-721 product passport for each purchased unit.
 
-[Watch the walkthrough](docs/demo/dvogue-walkthrough.mp4) · [Architecture](docs/ARCHITECTURE.md) · [Run locally](#run-locally) · [Contract source](contracts/) · [Deployment guide](docs/DEPLOYMENT.md)
+[Live demo](https://dvogue.vercel.app) · [Watch the walkthrough](docs/demo/dvogue-walkthrough.mp4) · [Architecture](docs/ARCHITECTURE.md) · [Run locally](#run-locally) · [Contract source](contracts/) · [Deployment guide](docs/DEPLOYMENT.md)
 
 ![Dvogue storefront with an editorial fashion campaign and collection navigation](docs/images/storefront.png)
 
-> **Project status:** working local-chain portfolio demo. Public hosting and public-testnet deployment are not configured. The collection is illustrative; checkout creates digital receipts and passports using test currency. Physical sales and delivery are outside this demo's scope.
+> **Project status:** the [public storefront is live on Vercel](https://dvogue.vercel.app). Blockchain checkout and passports work on the local development chain; public-testnet contracts are not configured, so wallet purchases are disabled on the hosted demo. The collection is illustrative, and physical sales and delivery are outside this demo's scope.
 
 ## The experience
 
@@ -120,7 +120,7 @@ The browser suite uses a test wallet adapter. Manual testing with a real wallet 
 
 This is a single-merchant, hybrid Web3 prototype. The owner manages listings, attestations, and withdrawals. Catalog INR prices and contract ETH prices are independent, with no live conversion. Token URIs are captured at issuance, but app-hosted metadata content is mutable. No escrow, refunds, shipping, multi-seller administration, or independent security audit is provided.
 
-The [deployment guide](docs/DEPLOYMENT.md) covers public hosting, a funded testnet development wallet, contract verification, and real-wallet validation. Public deployment is a future step; there are no public contract addresses or hosted-demo claims in this repository.
+The [deployment guide](docs/DEPLOYMENT.md) covers public hosting, a funded testnet development wallet, contract verification, and real-wallet validation. The storefront is hosted at [dvogue.vercel.app](https://dvogue.vercel.app). Public-testnet contract deployment remains a future step; there are no public contract addresses yet.
 
 ## Project layout
 

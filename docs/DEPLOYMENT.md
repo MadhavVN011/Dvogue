@@ -2,7 +2,9 @@
 
 [Back to the project](../README.md) · [Development guide](DEVELOPMENT.md)
 
-The repository currently contains a reproducible local-chain demo. No public site or testnet contract deployment has been completed. This guide prepares that next step without implying that a public deployment exists.
+The public storefront is hosted at **https://dvogue.vercel.app**. Product browsing, bag and checkout review are available. The hosted `/api/network` currently reports checkout disabled because no public-testnet registry or marketplace addresses are configured. The contracts and complete purchase flow remain reproducible on the local development chain.
+
+Frontend hosting is complete; use the remaining steps below to prepare a public-testnet deployment and real-wallet validation.
 
 ## Prerequisites
 
