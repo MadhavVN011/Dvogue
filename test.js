@@ -1,46 +1,50 @@
-const CampaignFactory = require("./artifacts/contracts/Campaign.sol/CampaignFactory.json");
-const Campaign = require("./artifacts/contracts/Campaign.sol/Campaign.json");
-const { ethers } = require("ethers");
-require("dotenv").config({ path: "./.env.local" });
+import assert from 'node:assert/strict';
+import { ContractFactory, id, ZeroHash } from 'ethers';
+import { compileRegistry } from './scripts/compile.js';
+import { localChain } from './scripts/local-chain.js';
+import { products, productMetadata } from './lib/catalog.js';
+import { verifyProduct } from './lib/registry.js';
+import { runMarketTests } from './tests/market-contracts.js';
 
-const main = async () => {
-  //   const provider = new ethers.providers.JsonRpcProvider(
-  //     process.env.NEXT_PUBLIC_RPC_URL
-  //   );
+const chain = await localChain();
+try {
+  const owner = await chain.provider.getSigner(0);
+  const outsider = await chain.provider.getSigner(1);
+  const artifact = await compileRegistry();
+  const registry = await new ContractFactory(artifact.abi, artifact.bytecode, owner).deploy();
+  await registry.waitForDeployment();
+  const product = products[0];
+  const sku = id(product.sku);
+  const digest = id(JSON.stringify(productMetadata(product)));
+  const uri = 'http://localhost:3000/api/products/' + product.sku;
+  const expectRevert = action => assert.rejects(async () => { const tx = await action(); await tx.wait(); });
+  await expectRevert(() => registry.connect(outsider).registerProduct(sku, digest, uri));
+  await expectRevert(() => registry.registerProduct(ZeroHash, digest, uri));
+  await expectRevert(() => registry.registerProduct(sku, ZeroHash, uri));
+  await expectRevert(() => registry.registerProduct(sku, digest, ''));
+  await (await registry.registerProduct(sku, digest, uri)).wait();
+  assert.equal(await registry.productCount(), 1n);
+  const stored = await registry.getProduct(sku);
+  assert.equal(stored.metadataHash, digest);
+  assert.equal(stored.metadataURI, uri);
+  assert.ok(stored.registeredAt > 0n);
+  await expectRevert(() => registry.registerProduct(sku, digest, uri));
+  await assert.rejects(registry.getProduct(id('missing')));
+  await expectRevert(() => registry.connect(outsider).addCheckpoint(sku, 1, digest));
+  await expectRevert(() => registry.addCheckpoint(sku, 2, digest));
+  await expectRevert(() => registry.addCheckpoint(sku, 1, ZeroHash));
+  for (let stage = 1; stage <= 4; stage++) await (await registry.addCheckpoint(sku, stage, digest)).wait();
+  assert.equal((await registry.getProduct(sku)).stage, 4n);
+  await expectRevert(() => registry.addCheckpoint(sku, 5, digest));
 
-  //   const contract = new ethers.Contract(
-  //     process.env.NEXT_PUBLIC_ADDRESS,
-  //     CampaignFactory.abi,
-  //     provider
-  //   );
-
-  //   const getDeployedCampaign = contract.filters.campaignCreated(null,null,null,null,null,null,'Health');
-  //   let events = await contract.queryFilter(getDeployedCampaign);
-  //   let event = events.reverse();
-  //   console.log(event);
-
-  const provider = new ethers.providers.JsonRpcProvider(
-    process.env.NEXT_PUBLIC_RPC_URL
-  );
-
-  const contract = new ethers.Contract(
-    "0x813b7E7972D4E64D0481BA48517bCe4df480d51e",
-    Campaign.abi,
-    provider
-  );
-
-  const Donations = contract.filters.donated('0xc538779A628a21D7CCA7b1a3E57E92f5226C3E27');
-  const AllDonations = await contract.queryFilter(Donations);
-
-  const DonationsData =  AllDonations.map((e) => {
-    return {
-      donar: e.args.donar,
-      amount: parseInt(e.args.amount),
-      timestamp : parseInt(e.args.timestamp)
-  }});
-
-  console.log(DonationsData);
-
-};
-
-main();
+  process.env.NEXT_PUBLIC_REGISTRY_ADDRESS = await registry.getAddress();
+  process.env.NEXT_PUBLIC_RPC_URL = chain.url;
+  process.env.NEXT_PUBLIC_CHAIN_ID = '31337';
+  assert.equal((await verifyProduct(product)).matched, true);
+  assert.equal((await verifyProduct({ ...product, material: 'Different material' })).matched, false);
+  assert.equal((await verifyProduct({ ...product, sku: 'missing' })).matched, false);
+  process.env.NEXT_PUBLIC_CHAIN_ID = '1';
+  await assert.rejects(verifyProduct(product), /network/);
+  await runMarketTests({ chain, registry, owner, buyer: outsider, product });
+  console.log('PASS: contract compilation/deployment, access control, duplicates, invalid products, ordered checkpoints, and real RPC metadata verification.');
+} finally { await chain.close(); }

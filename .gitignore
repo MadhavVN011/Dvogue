@@ -33,3 +33,14 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# Secrets and generated blockchain/browser files
+.env
+.env.*
+!.env.example
+/artifacts/
+/cache/
+/playwright-report/
+/test-results/
+
+/.dvogue/

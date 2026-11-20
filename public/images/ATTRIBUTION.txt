@@ -1,0 +1,14 @@
+Preview fashion photography: Unsplash (https://unsplash.com/license).
+These photos illustrate a sample collection and are not pictures of products offered for sale.
+hero.jpg: https://images.unsplash.com/photo-1483985988355-763728e1935b
+coat.jpg: https://images.unsplash.com/photo-1539533018447-63fcce2678e3
+trousers.jpg: https://images.unsplash.com/photo-1594633312681-425c7b97ccd1
+jacket.jpg: https://images.unsplash.com/photo-1551028719-00167b16eac5
+shirt.jpg: https://images.unsplash.com/photo-1521572163474-6864f9cf17ab
+bag.jpg: https://images.unsplash.com/photo-1553062407-98eeb64c6a62
+collection.jpg: https://images.unsplash.com/photo-1445205170230-053b83016050
+poplin.jpg: https://images.unsplash.com/photo-1598554747436-c9293d6a588f
+knit.jpg: https://images.unsplash.com/photo-1434389677669-e08b4cac3105
+dress.jpg: https://images.unsplash.com/photo-1595777457583-95e059d581b8
+weekend-shirt.jpg: https://images.unsplash.com/photo-1596755094514-f87e34085b2c
+shoulder.jpg: https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d
