@@ -1,0 +1,11 @@
+.dvogue
+.env
+.env.*
+!.env.example
+artifacts
+cache
+test-results
+playwright-report
+.next
+node_modules
+*.pdf
