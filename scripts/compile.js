@@ -12,14 +12,16 @@ export async function compileContracts() {
   } };
   const output = JSON.parse(solc.compile(JSON.stringify(input), { import: name => {
     if (!name.startsWith('@openzeppelin/contracts/') || name.includes('..')) return { error: 'Unsupported import: ' + name };
-    try { return { contents: readFileSync(new URL('../node_modules/' + name, import.meta.url), 'utf8') }; } catch { return { error: 'Import not found: ' + name }; }
+    try { const contents = readFileSync(new URL('../node_modules/' + name, import.meta.url), 'utf8'); sources[name] = { content: contents }; return { contents }; } catch { return { error: 'Import not found: ' + name }; }
   } }));
   const errors = (output.errors || []).filter(error => error.severity === 'error');
   if (errors.length) throw new Error(errors.map(error => error.formattedMessage).join('\n'));
   const artifacts = {};
+  await mkdir(new URL('../artifacts/', import.meta.url), { recursive: true });
+  await writeFile(new URL('../artifacts/solc-input.json', import.meta.url), JSON.stringify(input, null, 2) + '\n');
   for (const name of names) {
     const result = output.contracts[name + '.sol'][name];
-    const artifact = { contractName: name, abi: result.abi, bytecode: '0x' + result.evm.bytecode.object };
+    const artifact = { contractName: name, sourceName: name + '.sol', compilerVersion: solc.version(), abi: result.abi, bytecode: '0x' + result.evm.bytecode.object };
     const directory = new URL('../artifacts/contracts/' + name + '.sol/', import.meta.url);
     await mkdir(directory, { recursive: true });
     await writeFile(new URL(name + '.json', directory), JSON.stringify(artifact, null, 2) + '\n');

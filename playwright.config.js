@@ -1,7 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 import { existsSync } from 'node:fs';
-const chrome = process.env.CHROMIUM_EXECUTABLE_PATH || ['/usr/bin/google-chrome', '/usr/bin/chromium'].find(existsSync);
+const chrome = process.env.CHROMIUM_EXECUTABLE_PATH || (!process.env.CI && ['/usr/bin/google-chrome', '/usr/bin/chromium'].find(existsSync));
 export default defineConfig({
+  forbidOnly: !!process.env.CI,
+  workers: process.env.CI ? 2 : undefined,
+  reporter: [['list'], ['html', { open: 'never' }]],
+  globalTimeout: 10 * 60 * 1000,
   testDir: './tests', testMatch: '**/*.spec.js', fullyParallel: true,
   use: { baseURL: 'http://127.0.0.1:3173', launchOptions: chrome ? { executablePath: chrome } : {}, trace: 'retain-on-failure' },
   projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'] } }, { name: 'mobile', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' } }],
