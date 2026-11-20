@@ -6,7 +6,7 @@ The public storefront is hosted at **https://dvogue.vercel.app** and connected t
 
 The steps below record how that deployment was made, so it can be repeated on another testnet or after a contract change.
 
-> **Public RPC note:** free load-balanced RPC endpoints can briefly serve state from a node one block behind. If `npm run contracts:deploy` stops with `InvalidStage` or a nonce error partway through seeding, the contracts already deployed are fine. Resume by finishing only the missing registrations, checkpoints and listings rather than redeploying.
+> **Public RPC note:** free load-balanced RPC endpoints can briefly answer from a node one block behind. On public networks the deploy script checks on-chain state before every step, tracks transaction nonces itself, and retries a step that fails for that reason, so a lagging node slows the run down rather than stopping it.
 
 ## Prerequisites
 
@@ -45,7 +45,16 @@ npm run check
 npm run contracts:deploy
 ```
 
-The deploy script compiles both contracts, deploys the registry and marketplace, registers ten illustrative products, and stocks all size variants. It sends multiple transactions and needs enough native test currency for deployment and seeding. If a public deployment fails partway through, inspect the transaction history before retrying; seeding is not a resumable migration system.
+The deploy script compiles both contracts, deploys the registry and marketplace, registers ten illustrative products, and stocks all size variants. It sends about 80 transactions and needs enough native test currency for deployment and seeding. On public networks it prints each contract address as soon as that contract is deployed, followed by one line per completed step.
+
+If a run stops partway, for example because the deployer ran out of test currency, resume it instead of starting over. Add the printed addresses to `.env.local` and run the same command again:
+
+```dotenv
+DEPLOY_REGISTRY_ADDRESS=<printed registry address>
+DEPLOY_MARKET_ADDRESS=<printed marketplace address>
+```
+
+Every step that is already on-chain is skipped, so only the missing registrations, checkpoints and listings are sent. Existing listings keep their current stock. Remove both lines afterwards so the next fresh deployment does not reuse them.
 
 For external networks, the script prints public contract addresses and chain ID. It does not write these into the local auto-deployment file or update hosted configuration automatically. The deployer becomes the registry and marketplace owner.
 
