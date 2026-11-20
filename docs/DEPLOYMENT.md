@@ -2,9 +2,11 @@
 
 [Back to the project](../README.md) · [Development guide](DEVELOPMENT.md)
 
-The public storefront is hosted at **https://dvogue.vercel.app**. Product browsing, bag and checkout review are available. The hosted `/api/network` currently reports checkout disabled because no public-testnet registry or marketplace addresses are configured. The contracts and complete purchase flow remain reproducible on the local development chain.
+The public storefront is hosted at **https://dvogue.vercel.app** and connected to Etherscan-verified contracts on **Sepolia** (chain ID 11155111). The addresses are listed in the [README](../README.md#sepolia-deployment), and the hosted `/api/network` reports checkout enabled.
 
-Frontend hosting is complete; use the remaining steps below to prepare a public-testnet deployment and real-wallet validation.
+The steps below record how that deployment was made, so it can be repeated on another testnet or after a contract change.
+
+> **Public RPC note:** free load-balanced RPC endpoints can briefly serve state from a node one block behind. If `npm run contracts:deploy` stops with `InvalidStage` or a nonce error partway through seeding, the contracts already deployed are fine. Resume by finishing only the missing registrations, checkpoints and listings rather than redeploying.
 
 ## Prerequisites
 

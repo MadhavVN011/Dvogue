@@ -12,7 +12,7 @@ Dvogue connects a fashion storefront to two Solidity contracts. Buyers can explo
 
 ![Dvogue storefront with an editorial fashion campaign and collection navigation](docs/images/storefront.png)
 
-> **Project status:** the [public storefront is live on Vercel](https://dvogue.vercel.app). Blockchain checkout and passports work on the local development chain; public-testnet contracts are not configured, so wallet purchases are disabled on the hosted demo. The collection is illustrative, and physical sales and delivery are outside this demo's scope.
+> **Project status:** the [public storefront is live on Vercel](https://dvogue.vercel.app) and connected to verified contracts on the **Sepolia testnet**. Wallet checkout and product passports work with test ETH from any EIP-1193 wallet such as MetaMask. The collection is illustrative, and physical sales and delivery are outside this demo's scope.
 
 ## The experience
 
@@ -55,7 +55,18 @@ Orders, inventory, and passport ownership live on-chain. The frontend and metada
 | [DvogueRegistry](contracts/DvogueRegistry.sol) | Product metadata and provenance | Owner-only registration, duplicate protection, ordered checkpoints, metadata digest verification |
 | [DvogueMarket](contracts/DvogueMarket.sol) | Native-currency checkout and product passports | Exact unit-price and payment checks, size-level stock, atomic purchases, order receipts, ERC-721 minting/transfers, owner withdrawals |
 
-The market uses OpenZeppelin's `ERC721Enumerable`, `Ownable`, and `ReentrancyGuard`. Contract builds pin the compiler, optimizer settings, and Cancun EVM target. A complete Standard JSON compiler input is generated for reproducibility and future explorer verification.
+The market uses OpenZeppelin's `ERC721Enumerable`, `Ownable`, and `ReentrancyGuard`. Contract builds pin the compiler, optimizer settings, and Cancun EVM target. A complete Standard JSON compiler input is generated for reproducibility and explorer verification.
+
+### Sepolia deployment
+
+Both contracts are deployed and source-verified on Etherscan (Solidity 0.8.39, optimizer 200 runs, Cancun EVM):
+
+| Contract | Sepolia address |
+| --- | --- |
+| DvogueRegistry | [`0x7ff4Ebb70838B28cBDB3b6Bc61af172b6184Fd3C`](https://sepolia.etherscan.io/address/0x7ff4Ebb70838B28cBDB3b6Bc61af172b6184Fd3C#code) |
+| DvogueMarket | [`0x7cF00D8536c9Dac5155769e3431Ef28cC696d51b`](https://sepolia.etherscan.io/address/0x7cF00D8536c9Dac5155769e3431Ef28cC696d51b#code) |
+
+The registry holds the ten sample products with three provenance checkpoints each, and the market lists all 38 size variants. Chain ID **11155111**; prices are in Sepolia test ETH.
 
 ## Run locally
 
@@ -104,7 +115,7 @@ npm audit
 | Contracts and client reads | Authorization, invalid registrations/carts, ordered checkpoints, metadata mismatches, exact payments, price changes, inventory, ERC-721 ownership/transfers, URI snapshots, withdrawals, receiver reentrancy, atomic mint rollback, wardrobe queries |
 | Browser | Seven scenarios on desktop and mobile: navigation/search/filters, sizing/provenance/wishlist/bag, missing and rejected wallets, network switching and purchases, receipt recovery, blocked storage |
 
-The browser suite uses a test wallet adapter. Manual testing with a real wallet extension remains a separate deployment check.
+The browser suite uses a test wallet adapter. A real MetaMask purchase on the hosted Sepolia deployment has also been completed and confirmed on-chain (order #1, passport #1).
 
 ## Design decisions
 
@@ -120,7 +131,7 @@ The browser suite uses a test wallet adapter. Manual testing with a real wallet 
 
 This is a single-merchant, hybrid Web3 prototype. The owner manages listings, attestations, and withdrawals. Catalog INR prices and contract ETH prices are independent, with no live conversion. Token URIs are captured at issuance, but app-hosted metadata content is mutable. No escrow, refunds, shipping, multi-seller administration, or independent security audit is provided.
 
-The [deployment guide](docs/DEPLOYMENT.md) covers public hosting, a funded testnet development wallet, contract verification, and real-wallet validation. The storefront is hosted at [dvogue.vercel.app](https://dvogue.vercel.app). Public-testnet contract deployment remains a future step; there are no public contract addresses yet.
+The [deployment guide](docs/DEPLOYMENT.md) covers public hosting, a funded testnet development wallet, contract verification, and real-wallet validation. The storefront is hosted at [dvogue.vercel.app](https://dvogue.vercel.app), with contracts on Sepolia listed under [Sepolia deployment](#sepolia-deployment).
 
 ## Project layout
 
