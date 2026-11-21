@@ -111,6 +111,8 @@ npm audit
 
 [GitHub Actions](.github/workflows/ci.yml) runs these checks on pushes and pull requests to `main`, installs Chromium, and uploads the browser report and failure traces. Neither contract tests nor browser tests need deployment secrets or real funds.
 
+Vercel builds every push to `main` but only switches the live site to it after two checks pass: the CI job above and a [post-deploy smoke test](.github/workflows/smoke.yml) of the new deployment itself (pages render, checkout is enabled for Sepolia, contracts are deployed and linked). Otherwise the previous version stays live. See [release gates](docs/DEPLOYMENT.md#release-gates).
+
 | Layer | Coverage |
 | --- | --- |
 | Domain | Catalog queries, price sorting, bag sanitization, corrupt storage input |

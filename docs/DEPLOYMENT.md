@@ -25,6 +25,17 @@ Initially, leave blockchain address settings unset. Visitors can browse the coll
 
 For Vercel, follow the [official Next.js deployment guide](https://nextjs.org/docs/app/getting-started/deploying). The repo does not include a hosting token or automatically provision an account.
 
+### Release gates
+
+The hosted project uses two Vercel deployment checks. Together they hold back each new production deployment from `dvogue.vercel.app` until it passes:
+
+| Check | Source | What it verifies |
+| --- | --- | --- |
+| `Lint, contracts, build and browsers` | [CI workflow](../.github/workflows/ci.yml), on every push | Lint, domain and contract tests, production build, desktop/mobile browser flows, dependency audit |
+| `Vercel - dvogue: smoke (production)` | [Smoke workflow](../.github/workflows/smoke.yml), on Vercel's `vercel.deployment.ready` event | The deployment itself: pages render, `/api/network` is enabled for chain 11155111, and both contracts exist and are linked ([scripts/smoke.js](../scripts/smoke.js)) |
+
+The smoke workflow needs the `VERCEL_AUTOMATION_BYPASS_SECRET` Actions secret, because unique deployment URLs sit behind Vercel Deployment Protection. Create it in Vercel under **Settings → Deployment Protection → Protection Bypass for Automation**. If you rename either job or status, update the matching check (`vercel project checks`); otherwise production deployments wait for a check that never arrives. To run the smoke test against any deployment, use `SMOKE_URL=https://dvogue.vercel.app npm run smoke`.
+
 ## 2. Prepare a local testnet deployment
 
 Copy `.env.example` to ignored `.env.local`. Set these values locally:

@@ -1,0 +1,53 @@
+# Smoke test: checks each new production deployment on Vercel before it goes live.
+# Vercel builds main, then sends GitHub a "deployment ready" event. This workflow tests that
+# deployment's own URL and reports a commit status. A Vercel deployment check waits for that
+# status, so dvogue.vercel.app only switches to the new deployment once this passes
+# (alongside the CI check).
+name: Smoke test
+
+on:
+  # Sent by Vercel's GitHub integration once a deployment is built, before production domains
+  # are assigned. GitHub only runs this if the workflow exists on the default branch.
+  repository_dispatch:
+    types: [vercel.deployment.ready]
+
+permissions:
+  contents: read
+  # Lets the Vercel status action set a commit status on the deployed commit.
+  statuses: write
+
+jobs:
+  smoke:
+    name: Smoke test deployment
+    # Only production deployments: previews don't get the Sepolia settings, so checkout is off there.
+    if: github.event.client_payload.environment == 'production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Marks the commit status "pending" now and sets success or failure when the job ends.
+      # Vercel's deployment check looks for a status with exactly this name. If you rename it,
+      # update the check in Vercel too (vercel project checks), or production stops updating.
+      - name: Report status to Vercel
+        uses: vercel/repository-dispatch/actions/status@30f760c6640485cd92f8c785ef361382555fb712 # v1
+        with:
+          name: 'Vercel - dvogue: smoke (production)'
+      # Check out the exact commit Vercel deployed, so the test matches the deployment.
+      - name: Check out deployed commit
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.client_payload.git.sha }}
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+      # Read-only checks: pages render, checkout is configured for Sepolia, and the contracts
+      # exist and are linked. No dependencies to install; no wallet or funds involved.
+      - name: Smoke test the deployment
+        run: node scripts/smoke.js
+        env:
+          SMOKE_URL: ${{ github.event.client_payload.url }}
+          EXPECTED_CHAIN_ID: '11155111'
+          # Unique deployment URLs sit behind Vercel Deployment Protection; this secret lets
+          # automation through. Created in Vercel (Protection Bypass for Automation) and stored
+          # as a GitHub Actions secret.
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
