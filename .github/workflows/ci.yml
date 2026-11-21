@@ -1,49 +1,83 @@
+# Continuous integration: checks every change before it can reach the live site.
+# Vercel deploys main on its own, but it only publishes a production build to
+# dvogue.vercel.app after the job below passes (a Vercel "deployment check").
 name: CI
 
+# When the workflow runs.
 on:
+  # Every push to main.
   push:
     branches: [main]
+  # Every pull request that targets main, so changes are checked before merging.
   pull_request:
     branches: [main]
+  # A "Run workflow" button on the GitHub Actions tab, for running it by hand.
   workflow_dispatch:
 
+# The job only needs to read the code. Keeping permissions minimal limits what a
+# compromised step could do.
 permissions:
   contents: read
 
+# If you push again while a run for the same branch is still going, cancel the
+# older run: only the newest code matters.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
+    # Vercel's deployment check looks for a GitHub check with exactly this name.
+    # If you rename it, update the check in Vercel too (vercel project checks),
+    # or production deploys will wait for a check that never arrives.
     name: Lint, contracts, build and browsers
+    # A fresh Linux machine from GitHub; it's thrown away after the run.
     runs-on: ubuntu-latest
+    # Stop a stuck run instead of letting it hang (a normal run takes 3–4 minutes).
     timeout-minutes: 20
     env:
+      # Tells tools such as Playwright they're running in CI (no interactive prompts, stricter retries).
       CI: 'true'
+      # Stops Next.js from sending anonymous usage data during the build.
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
+      # Download the repository's code onto the machine.
+      # Actions are pinned to an exact commit (the long hash) so a changed release can't slip in.
       - name: Check out source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      # Install the Node.js version named in .nvmrc, and cache npm downloads to speed up later runs.
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version-file: .nvmrc
           cache: npm
+      # Install the exact dependency versions recorded in package-lock.json.
       - name: Install locked dependencies
         run: npm ci
+      # Check code style and catch common mistakes (ESLint, zero warnings allowed).
       - name: Lint
         run: npm run lint
+      # Test the shop's rules (catalog, bag, prices), then compile the Solidity
+      # contracts and test them on a temporary local blockchain.
       - name: Test domain rules and smart contracts
         run: npm test
+      # Build the production website; fails if any page or route doesn't compile.
       - name: Build storefront
         run: npm run build
+      # Install the Chromium browser (and the Linux libraries it needs) for the browser tests.
       - name: Install Chromium and system dependencies
         run: npx playwright install --with-deps chromium
+      # A robot shopper uses the site on desktop and mobile screens: browsing, filters,
+      # bag, wallet connection, a rejected payment, a purchase and the wardrobe.
+      # It runs against its own local chain with a test wallet, so no real funds or secrets are needed.
       - name: Test desktop and mobile shopping flows
         run: npm run test:browser
+      # Fail if any installed package has a known high or critical security vulnerability.
       - name: Audit dependencies
         run: npm audit --audit-level=high
+      # Save the browser test report, plus screenshots and traces of any failure, so
+      # you can download them from the run's page. Runs even if earlier steps failed
+      # (that's when the report is most useful); skipped only if the run was cancelled.
       - name: Upload browser report and failure traces
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
