@@ -8,7 +8,7 @@
 
 Dvogue connects a fashion storefront to two Solidity contracts. Buyers can explore a collection, verify registered product details, pay from an Ethereum-compatible wallet, and receive a transferable ERC-721 product passport for each purchased unit.
 
-[Live demo](https://dvogue.vercel.app) · [Watch the walkthrough](docs/demo/dvogue-walkthrough.mp4) · [Architecture](docs/ARCHITECTURE.md) · [Run locally](#run-locally) · [Contract source](contracts/) · [Deployment guide](docs/DEPLOYMENT.md)
+[Live demo](https://dvogue.vercel.app) · [Watch the walkthrough](docs/demo/dvogue-walkthrough.mp4) · [Live Sepolia purchase](docs/demo/dvogue-sepolia-purchase.mp4) · [Architecture](docs/ARCHITECTURE.md) · [Run locally](#run-locally) · [Contract source](contracts/) · [Deployment guide](docs/DEPLOYMENT.md)
 
 ![Dvogue storefront with an editorial fashion campaign and collection navigation](docs/images/storefront.png)
 
@@ -32,6 +32,8 @@ Dvogue connects a fashion storefront to two Solidity contracts. Buyers can explo
 | ![Wallet checkout showing the on-chain total and test-network disclosure](docs/images/checkout.png) | ![Product passport read from the buyer's on-chain ownership](docs/images/wardrobe.png) |
 
 The [recorded walkthrough](docs/demo/dvogue-walkthrough.mp4) follows browsing → provenance check → bag → wallet connection → purchase → passport → order history. Recording uses a test EIP-1193 wallet adapter connected to a disposable Anvil chain: purchases are actual local-chain transactions, and no real wallet extension or funds are used. The [mobile preview](docs/images/mobile.png) and [confirmed receipt](docs/images/receipt.png) are also included.
+
+The [live Sepolia recording](docs/demo/dvogue-sepolia-purchase.mp4) runs the same flow on [dvogue.vercel.app](https://dvogue.vercel.app): provenance check, a rejected wallet request that keeps the bag, a confirmed purchase ([transaction](https://sepolia.etherscan.io/tx/0xd9e3bec716fe54620a027dae13e7e1d7ed1cb10461d698ddcd6fdb197fa027e3)), and the new passport and order in My wardrobe. Its wallet is a scripted EIP-1193 adapter that signs real Sepolia transactions with a development key.
 
 ## Architecture
 
