@@ -144,10 +144,10 @@ app/                 Next.js pages, styles and public metadata/configuration API
 components/          Shopping UI, wallet discovery, bag and wishlist persistence
 contracts/           Provenance registry and ERC-721 marketplace
 lib/                 Catalog, validation, blockchain queries and checkout
-scripts/             Compiler, deploy/seed, wallet funding and demo capture
-tests/              Domain, contract and browser checks, test wallet adapter
-docs/               Screenshots, walkthrough, architecture and setup guides
-.github/workflows/   Continuous integration
+scripts/             Compiler, deploy/seed, wallet funding, demo capture and smoke test
+tests/               Domain, contract and browser checks, test wallet adapter
+docs/                Screenshots, walkthrough, architecture and setup guides
+.github/workflows/   CI and post-deploy smoke test
 ```
 
 Photography is illustrative; sources are listed in [ATTRIBUTION.txt](public/images/ATTRIBUTION.txt). The original NEXUS presentation is retained as project context.
